@@ -127,7 +127,7 @@ class GraphAlgo(GraphAlgoInterface):
 
     def tarjan(self):
         GraphAlgo.time = 0
-        GraphAlgo.low_link = [0] * (len(self.get_graph().get_all_v()) + 1)
+        # GraphAlgo.low_link = [0] * (len(self.get_graph().get_all_v()) + 1)
         #   print(self.low_link)
         for node_i in self.get_graph().get_all_v().values():
             if node_i.get_info() != 'Visited':
@@ -136,8 +136,8 @@ class GraphAlgo(GraphAlgoInterface):
         return self.components
 
     def dfs(self, u):
-        print(len(GraphAlgo.low_link))
-        print(u.get_key())
+        # print(len(GraphAlgo.low_link))
+        # print(u.get_key())
         GraphAlgo.low_link[u.get_key()] = GraphAlgo.time
         GraphAlgo.time = GraphAlgo.time + 1
         u.set_info('Visited')
@@ -187,20 +187,21 @@ if __name__ == '__main__':
     # tmp2 = ga.shortest_path(1, 3)
     # print(tmp2)
     # ga.tarjan()
-    g.add_node(0)
+    # g.add_node(0)
     g.add_node(1)
     g.add_node(2)
     g.add_node(3)
     g.add_node(4)
-    g.add_node(5)
-    g.add_node(6)
-    g.add_node(7)
+    # g.add_node(5)
+    # g.add_node(6)
+    # g.add_node(7)
     g.add_edge(1, 2, 1)
     g.add_edge(2, 3, 1)
     g.add_edge(3, 1, 1)
     g.add_edge(3, 4, 1)
-    g.add_edge(0, 7, 4)
-    g.add_edge(6, 4, 3)
-    ga.save_to_json('json_graph.json')
-    ga.load_from_json('json_graph.json')
-    print(ga.get_graph())
+    # g.add_edge(0, 7, 4)
+    # g.add_edge(6, 4, 3)
+    # //ga.save_to_json('json_graph.json')
+    # //ga.load_from_json('json_graph.json')
+    print(ga.tarjan())
+    # print(ga.get_graph())
