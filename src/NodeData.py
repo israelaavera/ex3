@@ -1,6 +1,6 @@
 class NodeData:
 
-    def __init__(self, key, pos=(0, 0)):
+    def __init__(self, key, pos: tuple = None):
         self.__key = key
         self.__pos = pos
         self.__info = "W"
@@ -12,6 +12,10 @@ class NodeData:
 
     def get_pos(self):
         return self.__pos
+
+    # **************************************** #
+    def set_pos(self, p: tuple):
+        self.__pos = p
 
     def get_info(self):
         return self.__info

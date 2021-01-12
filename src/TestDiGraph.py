@@ -2,7 +2,7 @@ import unittest
 from DiGraph import DiGraph
 
 
-class MyTestCase(unittest.TestCase, DiGraph):
+class MyTestCase(unittest.TestCase):
 
     def test_size(self):
         g = DiGraph()
