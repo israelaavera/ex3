@@ -1,35 +1,37 @@
 import json
+import sys
+import time
 from typing import List
 from GraphAlgoInterface import GraphAlgoInterface
 from DiGraph import DiGraph
+from NodeData import NodeData
 # from queue import PriorityQueue
 import heapq
 # from src import GraphInterface
 import numpy as np
 import matplotlib.pyplot as plt
 import random
+import networkx as nx
 
 
 class GraphAlgo(GraphAlgoInterface):
-    time = 0
-    components = []  # list(list
-    low_link = {}
-    stack = []
+    components = [[]]  # list(list
 
     def __init__(self, graph=None):
         self.__g = graph
         self.__dijkstra_counter = 0
 
     def get_dijkstra_counter(self):
-        return  self.__dijkstra_counter
+        return self.__dijkstra_counter
 
-    def get_graph(self):
+    def get_graph(self) -> DiGraph:
         return self.__g
 
     def set_graph(self, ng: DiGraph):
         self.__g = ng
 
     def shortest_path(self, id1: int, id2: int) -> (float, list):
+        start_time = time.time()
         src_node = self.get_graph().get_all_v().get(id1)
         dst_node = self.get_graph().get_all_v().get(id2)
         if src_node is None and dst_node is None:
@@ -51,21 +53,26 @@ class GraphAlgo(GraphAlgoInterface):
         ans.append(tmp.get_key())
         ans.reverse()
         final_ans = (dst_node.get_weight(), ans)
+        diff = time.time() - start_time
+        print(f'Shortest path time is: {diff}')
         return final_ans
 
     def connected_component(self, id1: int) -> list:
+        start_time = time.time()
         cc_list = self.connected_components()
         node = self.get_graph().get_all_v().get(id1)
         for i in cc_list:
             if node in i:
+                diff = time.time() - start_time
+                print(f'connected component time is: {diff}')
                 return i
 
     def connected_components(self) -> List[list]:
+        start_time = time.time()
         GraphAlgo.components.clear()
-        GraphAlgo.time = 0
-        GraphAlgo.low_link.clear()
-        GraphAlgo.stack.clear()
-        ans = self.tarjan()
+        ans = self.scc_check()
+        diff = time.time() - start_time
+        print(f'connected components time is: {diff}')
         return ans
 
     def plot_graph(self) -> None:
@@ -112,7 +119,7 @@ class GraphAlgo(GraphAlgoInterface):
                         y1 = y1 + 3
                 # =======================================================
                 ind = random.randint(0, len(xy_list)) - 1
-                ans = (x1 + xy_list[ind][0], y1 + xy_list[ind][1],  0)
+                ans = (x1 + xy_list[ind][0], y1 + xy_list[ind][1], 0)
             xy_list.append(ans)
             node_i.set_pos(ans)
         for node_i in self.get_graph().get_all_v().keys():  # Iterate over node key
@@ -121,12 +128,12 @@ class GraphAlgo(GraphAlgoInterface):
                 for node_j in self.get_graph().all_out_edges_of_node(node_i).keys():  # Iterate over neighbors of node_i
                     x2, y2, z2 = self.get_graph().get_all_v().get(node_j).get_pos()
                     plt.annotate("", xy=(x2, y2), xytext=(x1, y1), arrowprops=dict(arrowstyle="->"))
-                    plt.annotate(f'{self.get_graph().all_out_edges_of_node(node_i).get(node_j)}', xy=(x2, y2),
-                                 xytext=((x1 + x2) / 2, (y1 + y2) / 2), color='blue')
+                    # plt.annotate(f'{self.get_graph().all_out_edges_of_node(node_i).get(node_j)}', xy=(x2, y2),
+                    #              xytext=((x1 + x2) / 2, (y1 + y2) / 2), color='blue')
         for node in self.get_graph().get_all_v().values():
-            x, y , z = node.get_pos()
-            plt.scatter(x, y, color='c', s=50)  # Draw a vertex
-            plt.text(x, y, f'{node.get_key()}', color='red', weight='bold', size=13)
+            x, y, z = node.get_pos()
+            plt.scatter(x, y, color='r', s=50)  # Draw a vertex
+            plt.text(x, y, f'{node.get_key()}', color='g', weight='bold', size=13)
         plt.show()
 
     def load_from_json(self, file_name: str) -> bool:
@@ -146,8 +153,8 @@ class GraphAlgo(GraphAlgoInterface):
                             z = float(z_s)
                             chosen_xyz = (x, y, z)
                             new_graph.add_node(a.get('id'), chosen_xyz)
-                        else:
-                            new_graph.add_node(a.get('id'), chosen_xyz)
+                    else:
+                        new_graph.add_node(a.get('id'), chosen_xyz)
                 edges_arr = new_dict.get("Edges")
                 for a in edges_arr:
                     new_graph.add_edge(a.get("src"), a.get("dest"), a.get("w"))
@@ -167,12 +174,12 @@ class GraphAlgo(GraphAlgoInterface):
                 x = self.get_graph().get_all_v().get(tmp_id).get_pos()[0]
                 y = self.get_graph().get_all_v().get(tmp_id).get_pos()[1]
                 z = self.get_graph().get_all_v().get(tmp_id).get_pos()[2]
-                ans_temp.get("Nodes").append({"id": tmp_id, "pos":f'{x},{y},{z}'})
+                ans_temp.get("Nodes").append({"id": tmp_id, "pos": f'{x},{y},{z}'})
         for tmp_id in self.get_graph().get_all_v().keys():
             if self.get_graph().all_out_edges_of_node(tmp_id) is not None:
                 for tmp2 in self.get_graph().all_out_edges_of_node(tmp_id).keys():
                     ans_temp.get("Edges").append(
-                        {"src":tmp_id,"dest":tmp2,"w":self.get_graph().all_out_edges_of_node(tmp_id).get(tmp2)})
+                        {"src": tmp_id, "dest": tmp2, "w": self.get_graph().all_out_edges_of_node(tmp_id).get(tmp2)})
 
         ans = json.dumps(ans_temp)
         try:
@@ -202,7 +209,7 @@ class GraphAlgo(GraphAlgoInterface):
         while len(node_c) > 0:
             polled_node = heapq.heappop(node_c)
             a_id_list = list(self.get_graph().all_out_edges_of_node(polled_node.get_key()))
-            print(a_id_list)
+            # print(a_id_list)
             a_node_list = self.get_graph().get_node_list(a_id_list)
             for i in a_node_list:
                 adj = i
@@ -217,47 +224,46 @@ class GraphAlgo(GraphAlgoInterface):
                         if adj not in node_c:
                             heapq.heappush(node_c, adj)
             polled_node.set_info('B')
-            print(polled_node)
             self.__dijkstra_counter = self.__dijkstra_counter + 1
 
-    def tarjan(self):
-        GraphAlgo.components.clear()
-        GraphAlgo.time = 0
-        GraphAlgo.low_link.clear()
-        GraphAlgo.stack.clear()
-        # GraphAlgo.low_link = [0] * (len(self.get_graph().get_all_v()) + 1)
-        #   print(self.low_link)
-        for node_i in self.get_graph().get_all_v().values():
-            if node_i.get_info() != 'Visited':
-                self.dfs(node_i)
-        self.restore_nodes()
+    def scc_check(self):
+        list1 = []
+        list2 = []
+        visited_for_scc = []
+        for node in self.get_graph().get_all_v().values():
+            if node.get_key() not in visited_for_scc:
+                list1.clear()
+                self.bfs(node, list1, True)
+                list2.clear()
+                self.restore_nodes()
+                self.bfs(node, list2, False)
+                component = []
+                for item in list1:
+                    if item in list2:
+                        component.append(item)
+                self.components.append(component)
+                self.restore_nodes()
+                for item in component:
+                    visited_for_scc.append(item.get_key())
         return self.components
 
-    def dfs(self, u):
-        # print(len(GraphAlgo.low_link))
-        # print(u.get_key())
-        GraphAlgo.low_link[u.get_key()] = GraphAlgo.time
-        GraphAlgo.time = GraphAlgo.time + 1
-        u.set_info('Visited')
-        GraphAlgo.stack.append(u)
-        u_is_component_root = True
-        arr_index_temp = self.get_graph().all_out_edges_of_node(u.get_key())
-        arr_nodes_temp = self.get_graph().get_node_list(arr_index_temp)
-        for v in arr_nodes_temp:
-            if v.get_info() != 'Visited':
-                self.dfs(v)
-            if GraphAlgo.low_link[u.get_key()] > GraphAlgo.low_link[v.get_key()]:
-                GraphAlgo.low_link[u.get_key()] = GraphAlgo.low_link[v.get_key()]
-                u_is_component_root = False
-        if u_is_component_root:
-            component = []
-            while True:
-                x = GraphAlgo.stack.pop()
-                component.append(x)
-                GraphAlgo.low_link[x.get_key()] = 10000 * 100000
-                if x.get_key() == u.get_key():
-                    break
-            GraphAlgo.components.append(component)
+    def bfs(self, src: NodeData, list_i: [NodeData], in_or_out: bool):
+        if src in self.get_graph().get_all_v().values():
+            q = []
+            src.set_info('Visited')
+            q.append(src)
+            list_i.append(src)
+            while len(q) > 0:
+                temp = q.pop()
+                if in_or_out:
+                    nodes_ni_list = self.get_graph().get_node_list(self.get_graph().all_out_edges_of_node(temp.get_key()).keys())
+                else:
+                    nodes_ni_list = self.get_graph().get_node_list(self.get_graph().all_in_edges_of_node(temp.get_key()).keys())
+                for neighbor in nodes_ni_list:
+                    if neighbor.get_info() != 'Visited':
+                        neighbor.set_info('Visited')
+                        q.append(neighbor)
+                        list_i.append(neighbor)
 
     def restore_nodes(self):
         if len(self.get_graph().get_all_v()) > 0:
@@ -266,32 +272,10 @@ class GraphAlgo(GraphAlgoInterface):
 
 
 if __name__ == '__main__':
-                        # g = DiGraph()
-                        # ga = GraphAlgo(g)
-                        # g.add_node(0, (0, 2, 4))
-                        # g.add_node(1, (2, 5, 6))
-                        # g.add_node(2)
-                        # g.add_node(3)
-                        # g.add_node(4)
-                        #
-                        # ga.load_from_json('A5')
-                        # ga.save_to_json('json_graph.json')
-                        # # ga.save_to_json('json_graph.json')
-                        # # ga.load_from_json('T0.json')
-                        # print(ga.get_graph().get_all_v().keys())
-                        # ga.plot_graph()
-                g = DiGraph()
-                g.add_node(0)
-                g.add_node(1)
-                g.add_node(2)
-                ga = GraphAlgo(g)
-                g.add_edge(0, 1, 1)
-                g.add_edge(0, 2, 9)
-                g.add_edge(1, 2, 3)
-                g.add_edge(2, 1, 3)
-
-                        # works
-                        # ga.dijkstra(g.get_all_v().get(0))
-                        # self.assertEqual(3, ga.get_dijkstra_counter())
-                        # not works
-                ga.dijkstra(g.get_all_v().get(2))
+    g = DiGraph()
+    ga = GraphAlgo(g)
+    print(ga.load_from_json('G_30000_240000_2.json'))
+    ga.connected_components()
+    ga.connected_component(0)
+    # print(ga.get_graph())
+    ga.shortest_path(0, 9)

@@ -100,25 +100,17 @@ class MyTestCase(unittest.TestCase):
         # not works
         ga.dijkstra(g.get_all_v().get(2))
         self.assertNotEqual(3, ga.get_dijkstra_counter())
-    def test_tarjan(self):
+
+    def test_scc(self):
         g = DiGraph()
+        for i in range(0, 10000):
+            g.add_node(i)
         ga = GraphAlgo(g)
-        g.add_node(0)
-        g.add_node(1)
-        g.add_node(2)
-        g.add_node(3)
-        g.add_node(4)
-        g.add_node(5)
-        g.add_edge(0, 1, 1)
-        g.add_edge(0, 2, 9)
-        g.add_edge(1, 2, 3)
-        g.add_edge(2, 1, 3)
-        g.add_edge(1, 4, 1)
-        g.add_edge(4, 5, 2)
-        g.add_edge(5, 4, 234)
-        g.add_edge(3, 5, 2)
-        g.add_edge(2, 3, 4)
-        self.assertEqual(4, len(ga.tarjan()))
+        for i in range(0, 9999):
+            g.add_edge(i, i + 1, 1)
+        g.add_edge(9999, 0, 1)
+        self.assertEqual(1, len(ga.connected_components()))
+
 
 if __name__ == '__main__':
     unittest.main()
