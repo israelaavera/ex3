@@ -5,9 +5,7 @@ from typing import List
 from GraphAlgoInterface import GraphAlgoInterface
 from DiGraph import DiGraph
 from NodeData import NodeData
-# from queue import PriorityQueue
 import heapq
-# from src import GraphInterface
 import numpy as np
 import matplotlib.pyplot as plt
 import random
@@ -15,22 +13,55 @@ import networkx as nx
 
 
 class GraphAlgo(GraphAlgoInterface):
+    """
+        This class represent a set of algorithms on a directed weighted graph.
+    """
     components = [[]]  # list(list
 
     def __init__(self, graph=None):
+        """
+        A constructor for the GraphAlgo.
+        :param graph: DiGraph
+            The graph we want to initialize
+        """
         self.__g = graph
         self.__dijkstra_counter = 0
 
     def get_dijkstra_counter(self):
+        """
+        return the dijkstra counter
+        :return: int
+            the dijkstra counter
+        """
         return self.__dijkstra_counter
 
     def get_graph(self) -> DiGraph:
+        """
+        return the current graph.
+        :return: DiGraph
+            the current graph
+        """
         return self.__g
 
     def set_graph(self, ng: DiGraph):
+        """
+        set the current graph to the wanted graph
+        :param ng: DiGraph
+            the wanted graph
+        :return: None
+        """
         self.__g = ng
 
     def shortest_path(self, id1: int, id2: int) -> (float, list):
+        """
+        search for the most efficient route from id1 to id2.
+        :param id1: int
+            source node
+        :param id2: int
+            destination node
+        :return: tuple
+            the weight of the route and a list of the node ids
+        """
         start_time = time.time()
         src_node = self.get_graph().get_all_v().get(id1)
         dst_node = self.get_graph().get_all_v().get(id2)
@@ -58,6 +89,13 @@ class GraphAlgo(GraphAlgoInterface):
         return final_ans
 
     def connected_component(self, id1: int) -> list:
+        """
+        returns the component that contains id1
+        :param id1: int
+            the given node_id
+        :return: list
+            The component that contains id1
+        """
         start_time = time.time()
         cc_list = self.connected_components()
         node = self.get_graph().get_all_v().get(id1)
@@ -68,6 +106,11 @@ class GraphAlgo(GraphAlgoInterface):
                 return i
 
     def connected_components(self) -> List[list]:
+        """
+        returns a list of all the components of the graph.
+        :return: List[list]
+            A list of all the components of the graph
+        """
         start_time = time.time()
         GraphAlgo.components.clear()
         ans = self.scc_check()
@@ -76,6 +119,10 @@ class GraphAlgo(GraphAlgoInterface):
         return ans
 
     def plot_graph(self) -> None:
+        """
+        Display the graph.
+        :return: None
+        """
         temp_list = []
         xy_list = []
         for node_i in self.get_graph().get_all_v().values():
@@ -90,7 +137,6 @@ class GraphAlgo(GraphAlgoInterface):
             del temp_list[0]
         for node_i in temp_list:
             x1, y1 = random.randint(-10, 11), random.randint(-10, 11)
-            # =======================================================
             if -2 <= x1 <= 2:
                 if x1 < 0:
                     x1 = x1 - 3
@@ -101,12 +147,10 @@ class GraphAlgo(GraphAlgoInterface):
                     y1 = y1 - 3
                 else:
                     y1 = y1 + 3
-            # =======================================================
             ind = random.randint(0, len(xy_list)) - 1
             ans = (x1 + xy_list[ind][0], y1 + xy_list[ind][1], 0)
             while ans in xy_list:
                 x1, y1 = random.randint(-10, 11), random.randint(-10, 11)
-                # =======================================================
                 if -2 <= x1 <= 2:
                     if x1 < 0:
                         x1 = x1 - 3
@@ -117,7 +161,6 @@ class GraphAlgo(GraphAlgoInterface):
                         y1 = y1 - 3
                     else:
                         y1 = y1 + 3
-                # =======================================================
                 ind = random.randint(0, len(xy_list)) - 1
                 ans = (x1 + xy_list[ind][0], y1 + xy_list[ind][1], 0)
             xy_list.append(ans)
@@ -128,8 +171,6 @@ class GraphAlgo(GraphAlgoInterface):
                 for node_j in self.get_graph().all_out_edges_of_node(node_i).keys():  # Iterate over neighbors of node_i
                     x2, y2, z2 = self.get_graph().get_all_v().get(node_j).get_pos()
                     plt.annotate("", xy=(x2, y2), xytext=(x1, y1), arrowprops=dict(arrowstyle="->"))
-                    # plt.annotate(f'{self.get_graph().all_out_edges_of_node(node_i).get(node_j)}', xy=(x2, y2),
-                    #              xytext=((x1 + x2) / 2, (y1 + y2) / 2), color='blue')
         for node in self.get_graph().get_all_v().values():
             x, y, z = node.get_pos()
             plt.scatter(x, y, color='r', s=50)  # Draw a vertex
@@ -137,6 +178,13 @@ class GraphAlgo(GraphAlgoInterface):
         plt.show()
 
     def load_from_json(self, file_name: str) -> bool:
+        """
+        load a graph from a file with json format.
+        :param file_name: str
+            the file location
+        :return: bool
+            True if succeed, else False
+        """
         new_graph = DiGraph()
         try:
             with open(file_name, "r") as f:
@@ -161,16 +209,21 @@ class GraphAlgo(GraphAlgoInterface):
                 self.set_graph(new_graph)
                 return True
         except IOError as e:
-            # print(e)
             return False
 
     def save_to_json(self, file_name: str) -> bool:
+        """
+        Save the current graph to a file in json format.
+        :param file_name: str
+            the file location
+        :return: bool
+            True if succeed, else False
+        """
         ans_temp = {"Nodes": [], "Edges": []}
         for tmp_id in self.get_graph().get_all_v().keys():
             if self.get_graph().get_all_v().get(tmp_id).get_pos() is None:
                 ans_temp.get("Nodes").append({"id": tmp_id, "pos": ""})
             else:
-                # ans_temp.get("Nodes").append({"id": tmp_id})
                 x = self.get_graph().get_all_v().get(tmp_id).get_pos()[0]
                 y = self.get_graph().get_all_v().get(tmp_id).get_pos()[1]
                 z = self.get_graph().get_all_v().get(tmp_id).get_pos()[2]
@@ -180,7 +233,6 @@ class GraphAlgo(GraphAlgoInterface):
                 for tmp2 in self.get_graph().all_out_edges_of_node(tmp_id).keys():
                     ans_temp.get("Edges").append(
                         {"src": tmp_id, "dest": tmp2, "w": self.get_graph().all_out_edges_of_node(tmp_id).get(tmp2)})
-
         ans = json.dumps(ans_temp)
         try:
             f = open(file_name, "w")
@@ -192,6 +244,12 @@ class GraphAlgo(GraphAlgoInterface):
             return False
 
     def dijkstra(self, start_node):
+        """
+        implementation of dijkstra algorithm, to travel over the nodes on the graph.
+        :param start_node: NodeData
+            The source node
+        :return: None
+        """
         self.__dijkstra_counter = 0
         start_node.set_weight(0)
         start_node.set_tag(-1)
@@ -205,11 +263,9 @@ class GraphAlgo(GraphAlgoInterface):
         node_c.clear()
         node_c.append(start_node)
         heapq.heapify(node_c)
-        # print(list(node_c))
         while len(node_c) > 0:
             polled_node = heapq.heappop(node_c)
             a_id_list = list(self.get_graph().all_out_edges_of_node(polled_node.get_key()))
-            # print(a_id_list)
             a_node_list = self.get_graph().get_node_list(a_id_list)
             for i in a_node_list:
                 adj = i
@@ -227,6 +283,11 @@ class GraphAlgo(GraphAlgoInterface):
             self.__dijkstra_counter = self.__dijkstra_counter + 1
 
     def scc_check(self):
+        """
+        search for all the components on the graph.
+        :return: list[list[NodeData]]
+            The strongly connected components
+        """
         list1 = []
         list2 = []
         visited_for_scc = []
@@ -248,6 +309,16 @@ class GraphAlgo(GraphAlgoInterface):
         return self.components
 
     def bfs(self, src: NodeData, list_i: [NodeData], in_or_out: bool):
+        """
+        Implementation of bfs algorithm.
+        :param src: NodeData
+            the source node
+        :param list_i: list[NodeData]
+            A list that we wish to add all the available nodes from the source node
+        :param in_or_out: bool
+            if True then the traversal is on the original graph, else the traversal is on the opposite direction
+        :return:None
+        """
         if src in self.get_graph().get_all_v().values():
             q = []
             src.set_info('Visited')
@@ -266,16 +337,10 @@ class GraphAlgo(GraphAlgoInterface):
                         list_i.append(neighbor)
 
     def restore_nodes(self):
+        """
+        Restore the nodes to their default state.
+        :return: None
+        """
         if len(self.get_graph().get_all_v()) > 0:
             for node_a in self.get_graph().get_all_v().values():
                 node_a.set_info('W')
-
-
-if __name__ == '__main__':
-    g = DiGraph()
-    ga = GraphAlgo(g)
-    print(ga.load_from_json('G_30000_240000_2.json'))
-    ga.connected_components()
-    ga.connected_component(0)
-    # print(ga.get_graph())
-    ga.shortest_path(0, 9)

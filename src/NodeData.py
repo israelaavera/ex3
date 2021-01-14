@@ -1,6 +1,13 @@
 class NodeData:
 
     def __init__(self, key, pos: tuple = None):
+        """
+        initialize the node.
+        :param key: int
+            The id of the node
+        :param pos: tuple
+            The position of the node, three coordinates are required.
+        """
         self.__key = key
         self.__pos = pos
         self.__info = "W"
@@ -8,12 +15,21 @@ class NodeData:
         self.__weight = 0
 
     def get_key(self):
+        """
+        :return:
+        int
+            The node key value.
+        """
         return self.__key
 
     def get_pos(self):
+        """
+        :return:
+        tuple
+            The position of the node.
+        """
         return self.__pos
 
-    # **************************************** #
     def set_pos(self, p: tuple):
         self.__pos = p
 
@@ -33,10 +49,16 @@ class NodeData:
         return self.__weight
 
     def set_weight(self, t):
+        """ set the weight of the node
+        Parameters
+        ----------
+        t : float
+            the weight
+        """
         self.__weight = t
 
     def __repr__(self):
-        ans = f'{self.get_key()}'  # to add more information
+        ans = f'{self.get_key()}'
         return ans
 
     def __lt__(self, other):
